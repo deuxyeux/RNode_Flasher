@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <title>RNode Flasher</title>
+    <title>RNode Flasher (DIY)</title>
 
     <script src="./js/rnode.js"></script>
     <script src="./js/nrf52_dfu_flasher.js"></script>
@@ -22,121 +22,106 @@
     <script src="./js/crypto-js@3.9.1-1/md5.js"></script>
 
 </head>
-<body class="bg-slate-300">
+<body class="bg-[#1e293b]">
 
 <div id="app" class="space-y-2 p-3">
 
     <!-- header -->
-    <div class="flex border bg-gray-50 p-3 rounded shadow">
+    <div class="flex border bg-[#1e293b] p-3 rounded shadow">
         <div class="mr-3">
             <img src="reticulum_logo_512.png" class="w-14 h-14"/>
         </div>
         <div class="my-auto">
-            <div class="font-bold">RNode Flasher</div>
-            <div class="text-sm">Developed by <a target="_blank" href="https://liamcottle.com" class="text-blue-500 hover:underline">Liam Cottle</a></div>
+            <div class="font-bold text-white">RNode Flasher for DIY devices</div>
+            <div class="text-sm text-gray-300">Developed by <a target="_blank" href="https://liamcottle.com" class="text-blue-500 hover:underline">Liam Cottle</a></div>
         </div>
     </div>
 
-    <div class="border bg-gray-50 rounded shadow">
+    <div class="border bg-[#1e293b] rounded shadow">
 
-        <div class="border-b px-2 py-1">
+        <div class="border-b px-2 py-1 text-white">
             1. Select your device
         </div>
 
         <div class="p-3">
 
-            <div class="flex mb-1 space-x-1">
-                <div class="min-w-[70px] my-auto text-right">Product</div>
-                <select v-model="selectedProduct" class="w-full sm:w-min sm:min-w-[250px] bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-2 pr-8">
-                    <option :value="null" disabled>Select a Product</option>
-                    <option v-for="product of products" :value="product">{{ product.name }}</option>
+            <div class="mb-2">
+                <label class="block text-gray-300 mb-1">Product</label>
+                <select v-model="selectedProduct" class="w-full bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                    <option v-for="product in products" :value="product">{{ product.name }}</option>
                 </select>
             </div>
 
-            <div class="flex space-x-1">
-                <div class="min-w-[70px] my-auto text-right">Model</div>
-                <select v-model="selectedModel" class="w-full sm:w-min sm:min-w-[250px] bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-2 pr-8">
-                    <option :value="null" disabled>Select a Model</option>
-                    <option v-if="selectedProduct" v-for="model of selectedProduct.models" :value="model">{{ model.name }}</option>
+            <div v-if="selectedProduct" class="mb-2">
+                <label class="block text-gray-300 mb-1">Model</label>
+                <select v-model="selectedModel" class="w-full bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                    <option v-for="model in selectedProduct.models" :value="model">{{ model.name }}</option>
                 </select>
             </div>
-
-        </div>
 
         <!-- button to enter dfu mode on PLATFORM_NRF52 -->
         <div v-if="selectedProduct?.platform === 0x70" class="p-3 border-t">
-            <button @click="enterDfuMode" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+            <button @click="enterDfuMode" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                 Enter DFU Mode
             </button>
         </div>
-
-        <div class="border-t px-2 py-1">
-            <div class="text-sm space-x-1">
-                <span>Can't find your device? Open an issue on</span>
-                <a target="_blank" href="https://github.com/liamcottle/rnode-flasher" class="text-blue-500 hover:underline">GitHub</a>
-            </div>
-        </div>
-
     </div>
 
-    <div class="border bg-gray-50 rounded shadow">
+    <div class="border bg-[#1e293b] rounded shadow">
 
-        <div class="border-b px-2 py-1">
+        <div class="border-b px-2 py-1 text-white">
             2. Select firmware to flash (.zip)
         </div>
 
         <div class="p-3">
 
             <div class="mb-2">
-                <input ref="file" type="file"/>
+                <input ref="file" type="file" class="bg-gray-700 text-white"/>
             </div>
 
             <div v-if="!isFlashing" class="space-x-1">
-                <button @click="flash" :disabled="isFlashing" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="flash" :disabled="isFlashing" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Flash Now
                 </button>
             </div>
 
             <div v-else>
-                <span v-if="flashingProgress > 0">Flashing: {{flashingProgress}}%</span>
-                <span v-else>Flashing: please wait...</span>
-                <div class="mt-1 w-[200px] overflow-hidden rounded-full bg-gray-200">
+                <span v-if="flashingProgress > 0" class="text-white">Flashing: {{flashingProgress}}%</span>
+                <span v-else class="text-white">Flashing: please wait...</span>
+                <div class="mt-1 w-[200px] overflow-hidden rounded-full bg-gray-700">
                     <div class="h-2 rounded-full bg-blue-600" :style="{ 'width': `${flashingProgress}%`}"></div>
                 </div>
             </div>
 
         </div>
 
-        <div class="border-t px-2 py-1 text-sm">
+        <div class="border-t px-2 py-1 text-sm text-white">
             <div>
                 <span>Download Firmware</span>
-                <span v-if="selectedProduct && selectedModel && recommendedFirmwareFilename">: <a target="_blank" :href="`https://github.com/markqvist/RNode_Firmware/releases/latest/download/${recommendedFirmwareFilename}`" class="text-blue-500 hover:underline">{{ recommendedFirmwareFilename }}</a></span>
+                <span v-if="selectedProduct && selectedModel && recommendedFirmwareFilename">: <a target="_blank" :href="`firmware/${recommendedFirmwareFilename}`" class="text-blue-500 hover:underline">{{ recommendedFirmwareFilename }}</a>&nbsp;</span>
             </div>
-            <div class="space-x-1">
-                <a target="_blank" href="https://github.com/markqvist/RNode_Firmware/releases" class="text-blue-500 hover:underline">Official Firmware</a>
-                <span>•</span>
-                <a target="_blank" href="https://github.com/liberatedsystems/RNode_Firmware_CE/releases" class="text-blue-500 hover:underline">CE Firmware</a>
-                <span>•</span>
-                <a target="_blank" href="https://github.com/attermann/microReticulum_Firmware/releases" class="text-blue-500 hover:underline">Transport Node Firmware</a>
+            <div>
+                <span>Hardware Information</span>
+                <span v-if="selectedProduct && selectedModel && FirmwareRepo">: <a target="_blank" :href="`${FirmwareRepo}`" class="text-blue-500 hover:underline">{{ FirmwareRepo }}</a></span>
             </div>
         </div>
 
-        <div class="border-t px-2 py-1 text-sm">
+        <div class="border-t px-2 py-1 text-sm text-white">
             <div>Common error messages</div>
-            <div>• Hardware Failure: You need to provision the eeprom in step 3.</div>
+            <div>• Missing Config: You need to provision the EEPROM in step 3.</div>
             <div>• Firmware Corrupt: You need to set the firmware hash in step 4.</div>
         </div>
 
     </div>
 
-    <div class="border bg-gray-50 rounded shadow">
+    <div class="border bg-[#1e293b] rounded shadow">
 
-        <div class="border-b px-2 py-1">
+        <div class="border-b px-2 py-1 text-white">
             3. Provision EEPROM (sets device info, checksum and blank signature)
         </div>
 
         <div class="p-3">
-            <button v-if="!isProvisioning" @click="provision" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+            <button v-if="!isProvisioning" @click="provision" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                 Provision
             </button>
             <div v-else class="flex items-center space-x-1">
@@ -146,20 +131,20 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </div>
-                <div>Provisioning: please wait...</div>
+                <div class="text-white">Provisioning: please wait...</div>
             </div>
         </div>
 
     </div>
 
-    <div class="border bg-gray-50 rounded shadow">
+    <div class="border bg-[#1e293b] rounded shadow">
 
-        <div class="border-b px-2 py-1">
+        <div class="border-b px-2 py-1 text-white">
             4. Set Firmware Hash (uses hash from board, will fix later)
         </div>
 
         <div class="p-3">
-            <button v-if="!isSettingFirmwareHash" @click="setFirmwareHash" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+            <button v-if="!isSettingFirmwareHash" @click="setFirmwareHash" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                 Set Firmware Hash
             </button>
             <div v-else class="flex items-center space-x-1">
@@ -169,19 +154,19 @@
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                 </div>
-                <div>Setting Firmware Hash: please wait...</div>
+                <div class="text-white">Setting Firmware Hash: please wait...</div>
             </div>
         </div>
 
     </div>
 
-    <div class="border bg-gray-50 rounded shadow">
+    <div class="border bg-[#1e293b] rounded shadow">
 
-        <div class="border-b px-2 py-1">
+        <div class="border-b px-2 py-1 text-white">
             5. Done
         </div>
 
-        <div class="px-2 py-1 text-sm">
+        <div class="px-2 py-1 text-sm text-white">
             <div>• If you made it this far, and all previous steps were successful, your RNode should be ready to use.</div>
             <div>• To use RNode with <a target="_blank" href="https://github.com/liamcottle/reticulum-meshchat" class="text-blue-500 hover:underline">MeshChat</a>, you will need to add an <u>RNodeInterface</u> in the <u>Interfaces → Add Interface</u> page.</div>
             <div>• To use RNode with <a target="_blank" href="https://github.com/markqvist/Sideband/" class="text-blue-500 hover:underline">Sideband</a>, you will need to configure it in <u>Hardware → RNode</u> and enable <u>Connectivity → Connect via RNode</u>.</div>
@@ -190,33 +175,31 @@
 
     </div>
 
-    <div class="border bg-gray-50 rounded shadow">
+    <div class="border bg-[#1e293b] rounded shadow">
 
-        <div class="border-b px-2 py-1">
+        <div class="border-b px-2 py-1 text-white">
             Advanced Tools
         </div>
 
         <div class="p-3">
 
             <div class="space-x-1">
-                <button @click="detect" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="detect" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Detect RNode
                 </button>
-                <button @click="reboot" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="reboot" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Reboot RNode
                 </button>
-                <button @click="readDisplay" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="readDisplay" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Read Display
                 </button>
-                <button @click="dumpEeprom" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="dumpEeprom" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Dump EEPROM
                 </button>
-                <button @click="wipeEeprom" class="border border-gray-500 px-2 bg-red-100 hover:bg-red-200 rounded">
+                <button @click="wipeEeprom" class="border border-gray-500 px-2 bg-red-900 hover:bg-red-800 rounded text-white">
                     Wipe EEPROM
                 </button>
             </div>
-
-            <div class="text-sm text-gray-500">EEPROM dumps are shown in dev tools console.</div>
 
             <!-- show rnode display if available -->
             <div v-if="rnodeDisplayImage">
@@ -227,13 +210,13 @@
 
     </div>
 
-    <div class="border bg-gray-50 rounded shadow">
+    <div class="border bg-[#1e293b] rounded shadow">
 
-        <div class="border-b px-2 py-1">
+        <div class="border-b px-2 py-1 text-white">
             Configure Bluetooth (optional)
         </div>
 
-        <div class="border-b px-2 py-1 text-sm">
+        <div class="border-b px-2 py-1 text-sm text-gray-300">
             <div>• Bluetooth is not supported on all devices.</div>
             <div>• Some devices use Bluetooth Classic, and some use BLE (Bluetooth Low Energy)</div>
             <div>• Put the RNode into Bluetooth Pairing mode, then connect to it from Android Bluetooth settings.</div>
@@ -245,13 +228,13 @@
 
         <div class="p-3">
             <div class="space-x-1">
-                <button @click="enableBluetooth" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="enableBluetooth" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Enable
                 </button>
-                <button @click="disableBluetooth" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="disableBluetooth" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Disable
                 </button>
-                <button @click="startBluetoothPairing" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="startBluetoothPairing" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Start Pairing
                 </button>
             </div>
@@ -259,13 +242,13 @@
 
     </div>
 
-    <div class="border bg-gray-50 rounded shadow">
+    <div class="border bg-[#1e293b] rounded shadow">
 
-        <div class="border-b px-2 py-1">
+        <div class="border-b px-2 py-1 text-white">
             Configure TNC Mode (optional)
         </div>
 
-        <div class="border-b px-2 py-1 text-sm">
+        <div class="border-b px-2 py-1 text-sm text-gray-300">
             <div>• TNC mode allows an RNode to be used as a KISS compatible TNC over the Serial Port.</div>
             <div>• This mode makes it usable with amateur radio software that can talk to a KISS TNC over a serial port.</div>
             <div>• You must leave TNC mode disabled when using RNode with apps like MeshChat or Sideband.</div>
@@ -274,36 +257,36 @@
         <div class="p-3">
 
             <div class="flex mb-1 space-x-1">
-                <div class="min-w-[125px] my-auto text-right">Frequency (Hz)</div>
-                <input v-model="configFrequency" type="number" class="w-full sm:w-min sm:min-w-[250px] bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                <div class="min-w-[125px] my-auto text-right text-white">Frequency (Hz)</div>
+                <input v-model="configFrequency" type="number" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
             </div>
             <div class="flex mb-1 space-x-1">
-                <div class="min-w-[125px] my-auto text-right">Bandwidth</div>
-                <select v-model="configBandwidth" class="w-full sm:w-min sm:min-w-[250px] bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-2 pr-8">
+                <div class="min-w-[125px] my-auto text-right text-white">Bandwidth</div>
+                <select v-model="configBandwidth" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-2 pr-8">
                     <option v-for="bandwidth in RNodeInterfaceDefaults.bandwidths" :value="bandwidth">{{ bandwidth / 1000 }} KHz</option>
                 </select>
             </div>
             <div class="flex mb-1 space-x-1">
-                <div class="min-w-[125px] my-auto text-right">Tx Power (dBm)</div>
-                <input v-model="configTxPower" type="number" class="w-full sm:w-min sm:min-w-[250px] bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                <div class="min-w-[125px] my-auto text-right text-white">Tx Power (dBm)</div>
+                <input v-model="configTxPower" type="number" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
             </div>
             <div class="flex mb-1 space-x-1">
-                <div class="min-w-[125px] my-auto text-right">Spreading Factor</div>
-                <select v-model="configSpreadingFactor" class="w-full sm:w-min sm:min-w-[250px] bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-2 pr-8">
+                <div class="min-w-[125px] my-auto text-right text-white">Spreading Factor</div>
+                <select v-model="configSpreadingFactor" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-2 pr-8">
                     <option v-for="spreadingfactor in RNodeInterfaceDefaults.spreadingfactors" :value="spreadingfactor">{{ spreadingfactor }}</option>
                 </select>
             </div>
             <div class="flex mb-1 space-x-1">
-                <div class="min-w-[125px] my-auto text-right">Coding Rate</div>
-                <select v-model="configCodingRate" class="w-full sm:w-min sm:min-w-[250px] bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-2 pr-8">
+                <div class="min-w-[125px] my-auto text-right text-white">Coding Rate</div>
+                <select v-model="configCodingRate" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-2 pr-8">
                     <option v-for="codingrate in RNodeInterfaceDefaults.codingrates" :value="codingrate">{{ codingrate }}</option>
                 </select>
             </div>
             <div class="space-x-1">
-                <button @click="enableTncMode" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="enableTncMode" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Enable
                 </button>
-                <button @click="disableTncMode" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="disableTncMode" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Disable
                 </button>
             </div>
@@ -312,46 +295,178 @@
 
     </div>
 
-    <div class="border bg-gray-50 rounded shadow">
-
-        <div class="border-b px-2 py-1">
+        <div class="border-b px-2 py-1 text-white">
             Configure Display (optional)
         </div>
 
         <div class="p-3 space-y-2">
-
             <div class="flex space-x-1">
-                <div class="my-auto">Rotation</div>
-                <button @click="setDisplayRotation(0)" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <div class="my-auto text-white">Rotation</div>
+                <button @click="setDisplayRotation(0)" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     0
                 </button>
-                <button @click="setDisplayRotation(1)" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="setDisplayRotation(1)" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     1
                 </button>
-                <button @click="setDisplayRotation(2)" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="setDisplayRotation(2)" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     2
                 </button>
-                <button @click="setDisplayRotation(3)" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="setDisplayRotation(3)" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     3
                 </button>
             </div>
 
+            <div class="flex mb-1 space-x-1 mt-2">
+                <div class="my-auto text-right text-gray-300">Intensity</div>
+                <input v-model.number="displayIntensity" type="number" min="0" max="255" class="w-full sm:w-min bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                <div class="space-x-1 flex items-center">
+                    <button @click="setDisplayIntensity(displayIntensity)" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
+                        Set Display Intensity
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex mb-1 space-x-1 mt-2">
+                <div class="my-auto text-right text-gray-300">Timeout (sec)</div>
+                <input v-model.number="displayTimeout" type="number" min="0" max="255" class="w-full sm:w-min bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                <div class="space-x-1 flex items-center">
+                    <button @click="setDisplayTimeout(displayTimeout)" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
+                        Set Display Timeout
+                    </button>
+                </div>
+            </div>
+            
             <div class="flex space-x-1">
-                <div class="my-auto">Reconditioning</div>
-                <button @click="startDisplayReconditioning" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <div class="my-auto text-white">Reconditioning</div>
+                <button @click="startDisplayReconditioning" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Start
                 </button>
-                <button @click="reboot" class="border border-gray-500 px-2 bg-gray-100 hover:bg-gray-200 rounded">
+                <button @click="reboot" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
                     Stop
                 </button>
             </div>
+        </div>
+    </div>
 
+    <div class="border bg-[#1e293b] rounded shadow">
+
+        <div class="border-b px-2 py-1 text-white">
+            Configure WiFi (optional)
         </div>
 
-        <div class="border-t px-2 py-1 text-sm">
-            <div>Setting display rotation requires firmware v1.80+</div>
+        <div class="border-b px-2 py-1 text-sm text-gray-300">
+            <div>• WiFi configuration is supported only on ESP32 devices.</div>
+            <div>• Simultaneous operation of Bluetooth and WiFi is unsupported.</div>
+            <div>• For static IP configuration both the address and the netmask need to be set.</div>
+            <div>• Unset both IP and Netmask to use DHCP.</div>
         </div>
 
+            <div class="flex mb-1 space-x-1 mt-2">
+                <div class="min-w-[125px] my-auto text-right text-gray-300">Mode</div>
+                    <label class="text-white">
+                        <input type="radio" v-model="wifiMode" :value="0" class="mr-1 bg-gray-500 border-gray-100 focus:ring-blue-100">
+                        OFF
+                    </label>
+                    <label class="text-white">
+                        <input type="radio" v-model="wifiMode" :value="1" class="mr-1 bg-gray-500 border-gray-100 focus:ring-blue-100">
+                        STATION
+                    </label>
+                    <label class="text-white">
+                        <input type="radio" v-model="wifiMode" :value="2" class="mr-1 bg-gray-500 border-gray-100 focus:ring-blue-100">
+                        AP
+                    </label>
+                <div class="space-x-1 flex items-center">
+                    <button @click="setWiFiMode" :disabled="wifiMode === null" class="border px-2 rounded text-white" :class="wifiMode === null ? 'border-gray-600 bg-gray-800 text-gray-600 cursor-not-allowed' : 'border-gray-500 bg-gray-700 hover:bg-gray-600'">
+                        Set Mode
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex mb-1 space-x-1 mt-2">
+                <div class="min-w-[125px] my-auto text-right text-gray-300">Channel</div>
+                <input v-model.number="wifiChannel" type="number" min="1" max="14" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                <div class="space-x-1 flex items-center">
+                    <button @click="setWiFiChannel" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
+                        Set Channel
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex mb-1 space-x-1 mt-2">
+                <div class="min-w-[125px] my-auto text-right text-gray-300">SSID</div>
+                <input v-model="wifiSSID" type="text" placeholder="SSID" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                <div class="space-x-1 flex items-center">
+                    <button @click="setWiFiSSID" :disabled="!isSsidValid" :class="isSsidValid ? 'border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white' : 'border border-gray-600 px-2 bg-gray-800 text-gray-500 cursor-not-allowed rounded'">
+                        Set SSID
+                    </button>
+                    <button @click="unsetWiFiSSID" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
+                        Unset SSID
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex mb-1 space-x-1 mt-2">
+                <div class="min-w-[125px] my-auto text-right text-gray-300">PSK (Password)</div>
+                <input v-model="wifiPSK" type="password" placeholder="PSK (8 characters minimum)" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+
+                <div class="space-x-1 flex items-center">
+                    <!-- Tooltip wrapper -->
+                    <div class="relative inline-block group">
+                        <button
+                            @click="setWiFiPSK"
+                            :disabled="!isPskValid"
+                            :class="isPskValid
+                                ? 'border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white'
+                                : 'border border-gray-600 px-2 bg-gray-800 text-gray-500 cursor-not-allowed rounded'"
+                        >
+                            Set PSK
+                        </button>
+                        <!-- Tooltip -->
+                        <div
+                            v-if="!isPskValid"
+                            class="absolute left-1/2 -translate-x-1/2 -top-8
+                                hidden group-hover:block
+                                bg-gray-900 text-xs text-red-400
+                                px-2 py-1 rounded border border-gray-600
+                                whitespace-nowrap"
+                        >
+                            Password must be at least 8 characters.
+                        </div>
+                    </div>
+                    <button
+                        @click="unsetWiFiPSK"
+                        class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
+                    >
+                        Unset PSK
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex mb-1 space-x-1 mt-2">
+                <div class="min-w-[125px] my-auto text-right text-gray-300">IP Address</div>
+                <input v-model="wifiIP" type="text" placeholder="192.168.1.100" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                <div class="space-x-1 flex items-center">
+                    <button @click="setWiFiIP" :disabled="!isIpValid" :class="isIpValid ? 'border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white' : 'border border-gray-600 px-2 bg-gray-800 text-gray-500 cursor-not-allowed rounded'">
+                        Set IP
+                    </button>
+                    <button @click="unsetWiFiIP" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
+                        Unset IP
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex mb-1 space-x-1 mt-2 items-center">
+                <div class="min-w-[125px] my-auto text-right text-gray-300">Netmask</div>
+                <input v-model="wifiNM" type="text" placeholder="255.255.255.0" class="w-full sm:w-min sm:min-w-[250px] bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2">
+                <div class="space-x-1 flex items-center">
+                    <button @click="setWiFiNM" :disabled="!isNetmaskValid" :class="isNetmaskValid ? 'border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white' : 'border border-gray-600 px-2 bg-gray-800 text-gray-500 cursor-not-allowed rounded'">
+                        Set Netmask
+                    </button>
+                    <button @click="unsetWiFiNM" class="border border-gray-500 px-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
+                        Unset Netmask
+                    </button>
+                </div>
+            </div>
     </div>
 
 </div>
@@ -390,78 +505,63 @@
                 selectedModel: null,
                 products: [
                     {
-                        name: "Heltec LoRa32 v2",
-                        id: ROM.PRODUCT_H32_V2,
+                        name: "Aethernode",
+                        id: ROM.PRODUCT_HMBRW,
                         platform: ROM.PLATFORM_ESP32,
                         models: [
                             {
-                                id: ROM.MODEL_C4,
+                                id: ROM.MODEL_FE,
                                 name: "433 MHz",
                             },
-                            {
-                                id: ROM.MODEL_C9,
-                                name: "868 MHz / 915 MHz / 923 MHz",
-                            },
                         ],
-                        firmware_filename: "rnode_firmware_heltec32v2.zip",
+                        firmware_filename: "rnode_firmware_aethernode.zip",
+                        firmware_repo: "https://github.com/ahedproductions/aethernode",
                         flash_config: {
-                            flash_size: "8MB",
+                            flash_size: "4MB",
                             flash_files: {
-                                "0xe000": "rnode_firmware_heltec32v2.boot_app0",
-                                "0x1000": "rnode_firmware_heltec32v2.bootloader",
-                                "0x10000": "rnode_firmware_heltec32v2.bin",
+                                "0xe000": "rnode_firmware_aethernode.boot_app0",
+                                "0x1000": "rnode_firmware_aethernode.bootloader",
+                                "0x10000": "rnode_firmware_aethernode.bin",
                                 "0x210000": "console_image.bin",
-                                "0x8000": "rnode_firmware_heltec32v2.partitions",
+                                "0x8000": "rnode_firmware_aethernode.partitions",
                             },
                         },
                     },
                     {
-                        name: "Heltec LoRa32 v3",
-                        id: ROM.PRODUCT_H32_V3,
+                        name: "MeshAdventurer",
+                        id: ROM.PRODUCT_HMBRW,
                         platform: ROM.PLATFORM_ESP32,
                         models: [
                             {
-                                id: ROM.MODEL_C5,
-                                name: "433 MHz",
-                            },
-                            {
-                                id: ROM.MODEL_CA,
-                                name: "868 MHz / 915 MHz / 923 MHz",
+                                id: ROM.MODEL_FE,
+                                name: "868 MHz",
                             },
                         ],
-                        firmware_filename: "rnode_firmware_heltec32v3.zip",
+                        firmware_filename: "rnode_firmware_meshadventurer.zip",
+                        firmware_repo: "https://github.com/chrismyers2000/MeshAdventurer",
                         flash_config: {
-                            flash_size: "8MB",
+                            flash_size: "4MB",
                             flash_files: {
-                                "0xe000": "rnode_firmware_heltec32v3.boot_app0",
-                                "0x0": "rnode_firmware_heltec32v3.bootloader",
-                                "0x10000": "rnode_firmware_heltec32v3.bin",
+                                "0xe000": "rnode_firmware_meshadventurer.boot_app0",
+                                "0x1000": "rnode_firmware_meshadventurer.bootloader",
+                                "0x10000": "rnode_firmware_meshadventurer.bin",
                                 "0x210000": "console_image.bin",
-                                "0x8000": "rnode_firmware_heltec32v3.partitions",
+                                "0x8000": "rnode_firmware_meshadventurer.partitions",
                             },
                         },
                     },
                     {
-                        name: "Heltec LoRa32 v4",
-                        id: ROM.PRODUCT_H32_V4,
-                        platform: ROM.PLATFORM_ESP32,
+                        name: "FakeTec (Promicro)",
+                        id: ROM.PRODUCT_HMBRW,
+                        platform: ROM.PLATFORM_NRF52,
                         models: [
                             {
-                                id: ROM.MODEL_C8,
-                                name: "868 MHz / 915 MHz / 923 MHz with PA",
+                                id: ROM.MODEL_FE,
+                                name: "863-928 MHz",
                             },
                         ],
-                        firmware_filename: "rnode_firmware_heltec32v4pa.zip",
-                        flash_config: {
-                            flash_size: "16MB",
-                            flash_files: {
-                                "0xe000": "rnode_firmware_heltec32v4pa.boot_app0",
-                                "0x0": "rnode_firmware_heltec32v4pa.bootloader",
-                                "0x10000": "rnode_firmware_heltec32v4pa.bin",
-                                "0x210000": "console_image.bin",
-                                "0x8000": "rnode_firmware_heltec32v4pa.partitions",
-                            },
-                        },
+                        firmware_filename: "rnode_firmware_promicro.zip",
+                        firmware_repo: "https://github.com/gargomoma/fakeTec_pcb",
                     },
                     {
                         name: "Heltec T114",
@@ -478,440 +578,24 @@
                             },
                         ],
                         firmware_filename: "rnode_firmware_heltec_t114.zip",
-                    },
-                    {
-                        name: "LilyGO LoRa32 v1.0",
-                        id: ROM.PRODUCT_T32_10,
-                        platform: ROM.PLATFORM_ESP32,
-                        models: [
-                            {
-                                id: ROM.MODEL_BA,
-                                name: "433 MHz",
-                            },
-                            {
-                                id: ROM.MODEL_BB,
-                                name: "868 MHz / 915 MHz / 923 MHz",
-                            },
-                        ],
-                        firmware_filename: "rnode_firmware_lora32v10.zip",
-                        flash_config: {
-                            flash_size: "4MB",
-                            flash_files: {
-                                "0xe000": "rnode_firmware_lora32v10.boot_app0",
-                                "0x1000": "rnode_firmware_lora32v10.bootloader",
-                                "0x10000": "rnode_firmware_lora32v10.bin",
-                                "0x210000": "console_image.bin",
-                                "0x8000": "rnode_firmware_lora32v10.partitions",
-                            },
-                        },
-                    },
-                    {
-                        name: "LilyGO LoRa32 v2.0",
-                        id: ROM.PRODUCT_T32_20,
-                        platform: ROM.PLATFORM_ESP32,
-                        models: [
-                            {
-                                id: ROM.MODEL_B3,
-                                name: "433 MHz",
-                            },
-                            {
-                                id: ROM.MODEL_B8,
-                                name: "868 MHz / 915 MHz / 923 MHz",
-                            },
-                        ],
-                        firmware_filename: "rnode_firmware_lora32v20.zip",
-                        flash_config: {
-                            flash_size: "4MB",
-                            flash_files: {
-                                "0xe000": "rnode_firmware_lora32v20.boot_app0",
-                                "0x1000": "rnode_firmware_lora32v20.bootloader",
-                                "0x10000": "rnode_firmware_lora32v20.bin",
-                                "0x210000": "console_image.bin",
-                                "0x8000": "rnode_firmware_lora32v20.partitions",
-                            },
-                        },
-                    },
-                    {
-                        name: "LilyGO LoRa32 v2.1",
-                        id: ROM.PRODUCT_T32_21,
-                        platform: ROM.PLATFORM_ESP32,
-                        models: [
-                            {
-                                id: ROM.MODEL_B4,
-                                name: "433 MHz",
-                                firmware_filename: "rnode_firmware_lora32v21.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_lora32v21.boot_app0",
-                                        "0x1000": "rnode_firmware_lora32v21.bootloader",
-                                        "0x10000": "rnode_firmware_lora32v21.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_lora32v21.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_B9,
-                                name: "868/915/923 MHz",
-                                firmware_filename: "rnode_firmware_lora32v21.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_lora32v21.boot_app0",
-                                        "0x1000": "rnode_firmware_lora32v21.bootloader",
-                                        "0x10000": "rnode_firmware_lora32v21.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_lora32v21.partitions",
-                                    },
-                                },
-                            },
-                            // The TCXO model codes are only used here to select the correct firmware,
-                            // actual model codes in firmware is still 0xB4 and 0xB9.
-                            // https://github.com/markqvist/Reticulum/blob/master/RNS/Utilities/rnodeconf.py#L156
-                            // https://github.com/markqvist/Reticulum/blob/master/RNS/Utilities/rnodeconf.py#L3283
-                            {
-                                id: ROM.MODEL_B4_TCXO,
-                                mapped_id: ROM.MODEL_B4, // this device uses the same model code, but different firmware file
-                                name: "433 MHz, with TCXO",
-                                firmware_filename: "rnode_firmware_lora32v21_tcxo.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_lora32v21_tcxo.boot_app0",
-                                        "0x1000": "rnode_firmware_lora32v21_tcxo.bootloader",
-                                        "0x10000": "rnode_firmware_lora32v21_tcxo.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_lora32v21_tcxo.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_B9_TCXO,
-                                mapped_id: ROM.MODEL_B9, // this device uses the same model code, but different firmware file
-                                name: "868/915/923 MHz, with TCXO",
-                                firmware_filename: "rnode_firmware_lora32v21_tcxo.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_lora32v21_tcxo.boot_app0",
-                                        "0x1000": "rnode_firmware_lora32v21_tcxo.bootloader",
-                                        "0x10000": "rnode_firmware_lora32v21_tcxo.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_lora32v21_tcxo.partitions",
-                                    },
-                                },
-                            },
-                        ],
-                    },
-                    {
-                        name: "LilyGO LoRa T3S3",
-                        id: ROM.PRODUCT_RNODE,
-                        platform: ROM.PLATFORM_ESP32,
-                        models: [
-                            {
-                                id: ROM.MODEL_A5,
-                                name: "433 MHz (with SX1278 chip)",
-                                firmware_filename: "rnode_firmware_t3s3_sx127x.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_t3s3_sx127x.boot_app0",
-                                        "0x0": "rnode_firmware_t3s3_sx127x.bootloader",
-                                        "0x10000": "rnode_firmware_t3s3_sx127x.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_t3s3_sx127x.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_AA,
-                                name: "868/915/923 MHz (with SX1276 chip)",
-                                firmware_filename: "rnode_firmware_t3s3_sx127x.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_t3s3_sx127x.boot_app0",
-                                        "0x0": "rnode_firmware_t3s3_sx127x.bootloader",
-                                        "0x10000": "rnode_firmware_t3s3_sx127x.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_t3s3_sx127x.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_A1,
-                                name: "433 MHz (with SX1268 chip)",
-                                firmware_filename: "rnode_firmware_t3s3.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_t3s3.boot_app0",
-                                        "0x0": "rnode_firmware_t3s3.bootloader",
-                                        "0x10000": "rnode_firmware_t3s3.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_t3s3.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_A6,
-                                name: "868/915/923 MHz (with SX1262 chip)",
-                                firmware_filename: "rnode_firmware_t3s3.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_t3s3.boot_app0",
-                                        "0x0": "rnode_firmware_t3s3.bootloader",
-                                        "0x10000": "rnode_firmware_t3s3.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_t3s3.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_AC,
-                                name: "2.4 GHz (with SX1280 chip)",
-                                firmware_filename: "rnode_firmware_t3s3_sx1280_pa.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_t3s3_sx1280_pa.boot_app0",
-                                        "0x0": "rnode_firmware_t3s3_sx1280_pa.bootloader",
-                                        "0x10000": "rnode_firmware_t3s3_sx1280_pa.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_t3s3_sx1280_pa.partitions",
-                                    },
-                                },
-                            },
-                        ],
-                    },
-                    {
-                        name: "LilyGO T-Beam",
-                        id: ROM.PRODUCT_TBEAM,
-                        platform: ROM.PLATFORM_ESP32,
-                        models: [
-                            {
-                                id: ROM.MODEL_E4,
-                                name: "433 MHz (with SX1278 chip)",
-                                firmware_filename: "rnode_firmware_tbeam.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_tbeam.boot_app0",
-                                        "0x1000": "rnode_firmware_tbeam.bootloader",
-                                        "0x10000": "rnode_firmware_tbeam.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_tbeam.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_E9,
-                                name: "868/915/923 MHz (with SX1276 chip)",
-                                firmware_filename: "rnode_firmware_tbeam.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_tbeam.boot_app0",
-                                        "0x1000": "rnode_firmware_tbeam.bootloader",
-                                        "0x10000": "rnode_firmware_tbeam.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_tbeam.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_E3,
-                                name: "433 MHz (with SX1268 chip)",
-                                firmware_filename: "rnode_firmware_tbeam_sx1262.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_tbeam_sx1262.boot_app0",
-                                        "0x1000": "rnode_firmware_tbeam_sx1262.bootloader",
-                                        "0x10000": "rnode_firmware_tbeam_sx1262.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_tbeam_sx1262.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_E8,
-                                name: "868/915/923 MHz (with SX1262 chip)",
-                                firmware_filename: "rnode_firmware_tbeam_sx1262.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_tbeam_sx1262.boot_app0",
-                                        "0x1000": "rnode_firmware_tbeam_sx1262.bootloader",
-                                        "0x10000": "rnode_firmware_tbeam_sx1262.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_tbeam_sx1262.partitions",
-                                    },
-                                },
-                            },
-                        ],
-                    },
-                    {
-                        name: "LilyGO T-Beam Supreme",
-                        id: ROM.PRODUCT_TBEAM_S_V1,
-                        platform: ROM.PLATFORM_ESP32,
-                        models: [
-                            {
-                                id: ROM.MODEL_DB,
-                                name: "433 MHz (with SX1268 chip)",
-                            },
-                            {
-                                id: ROM.MODEL_DC,
-                                name: "868/915/923 MHz (with SX1262 chip)",
-                            },
-                        ],
-                        firmware_filename: "rnode_firmware_tbeam_supreme.zip",
-                        flash_config: {
-                            flash_size: "4MB",
-                            flash_files: {
-                                "0xe000": "rnode_firmware_tbeam_supreme.boot_app0",
-                                "0x0": "rnode_firmware_tbeam_supreme.bootloader",
-                                "0x10000": "rnode_firmware_tbeam_supreme.bin",
-                                "0x210000": "console_image.bin",
-                                "0x8000": "rnode_firmware_tbeam_supreme.partitions",
-                            },
-                        },
-                    },
-                    {
-                        name: "LilyGO T-Deck",
-                        id: ROM.PRODUCT_TDECK,
-                        platform: ROM.PLATFORM_ESP32,
-                        models: [
-                            {
-                                id: ROM.MODEL_D4,
-                                name: "433 MHz (with SX1268 chip)",
-                            },
-                            {
-                                id: ROM.MODEL_D9,
-                                name: "868/915/923 MHz (with SX1262 chip)",
-                            },
-                        ],
-                        firmware_filename: "rnode_firmware_tdeck.zip",
-                        flash_config: {
-                            flash_size: "4MB",
-                            flash_files: {
-                                "0xe000": "rnode_firmware_tdeck.boot_app0",
-                                "0x0": "rnode_firmware_tdeck.bootloader",
-                                "0x10000": "rnode_firmware_tdeck.bin",
-                                "0x210000": "console_image.bin",
-                                "0x8000": "rnode_firmware_tdeck.partitions",
-                            },
-                        },
-                    },
-                    {
-                        name: "LilyGO T-Echo",
-                        id: ROM.PRODUCT_TECHO,
-                        platform: ROM.PLATFORM_NRF52,
-                        models: [
-                            {
-                                id: ROM.MODEL_16,
-                                name: "433 MHz",
-                            },
-                            {
-                                id: ROM.MODEL_17,
-                                name: "868 MHz / 915 MHz / 923 MHz",
-                            },
-                        ],
-                        firmware_filename: "rnode_firmware_techo.zip",
-                    },
-                    {
-                        name: "RAK4631",
-                        id: ROM.PRODUCT_RAK4631,
-                        platform: ROM.PLATFORM_NRF52,
-                        models: [
-                            {
-                                id: ROM.MODEL_11,
-                                name: "433 MHz",
-                            },
-                            {
-                                id: ROM.MODEL_12,
-                                name: "868 MHz / 915 MHz / 923 MHz",
-                            },
-                        ],
-                        firmware_filename: "rnode_firmware_rak4631.zip",
-                    },
-                    {
-                        name: "RNode",
-                        id: ROM.PRODUCT_RNODE,
-                        platform: ROM.PLATFORM_ESP32,
-                        models: [
-                            {
-                                id: ROM.MODEL_A2,
-                                name: "Handheld v2.1 RNode, 410 - 525 MHz",
-                                firmware_filename: "rnode_firmware_ng21.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_ng21.boot_app0",
-                                        "0x1000": "rnode_firmware_ng21.bootloader",
-                                        "0x10000": "rnode_firmware_ng21.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_ng21.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_A7,
-                                name: "Handheld v2.1 RNode, 820 - 1020 MHz",
-                                firmware_filename: "rnode_firmware_ng21.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_ng21.boot_app0",
-                                        "0x1000": "rnode_firmware_ng21.bootloader",
-                                        "0x10000": "rnode_firmware_ng21.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_ng21.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_A1,
-                                name: "Prototype v2.2 RNode, 410 - 525 MHz",
-                                firmware_filename: "rnode_firmware_t3s3.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_t3s3.boot_app0",
-                                        "0x0": "rnode_firmware_t3s3.bootloader",
-                                        "0x10000": "rnode_firmware_t3s3.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_t3s3.partitions",
-                                    },
-                                },
-                            },
-                            {
-                                id: ROM.MODEL_A6,
-                                name: "Prototype v2.2 RNode, 820 - 1020 MHz",
-                                firmware_filename: "rnode_firmware_t3s3.zip",
-                                flash_config: {
-                                    flash_size: "4MB",
-                                    flash_files: {
-                                        "0xe000": "rnode_firmware_t3s3.boot_app0",
-                                        "0x0": "rnode_firmware_t3s3.bootloader",
-                                        "0x10000": "rnode_firmware_t3s3.bin",
-                                        "0x210000": "console_image.bin",
-                                        "0x8000": "rnode_firmware_t3s3.partitions",
-                                    },
-                                },
-                            },
-                        ],
+                        firmware_repo: "https://heltec.org/project/mesh-node-t114/",
                     },
                 ],
 
-                // Liam's default config for New Zealand / LongFast on Slot 10
-                configFrequency: 917375000,
+                // Default config
+                configFrequency: 433175000,
                 configBandwidth: 250000,
                 configTxPower: 22,
                 configSpreadingFactor: 11,
                 configCodingRate: 5,
+                displayIntensity: 255,
+                displayTimeout: 0,
+                wifiMode: null,
+                wifiChannel: 1,
+                wifiSSID: "",
+                wifiPSK: "",
+                wifiIP: "",
+                wifiNM: "",
 
                 RNodeInterfaceDefaults: {
                     bandwidths: [ // bandwidth in hz
@@ -942,10 +626,15 @@
                     ],
                 },
 
+                // Flag to track if we're in the initial setup
+                isInitializing: true,
+
             };
         },
         mounted() {
-
+            // Set default selections after component is mounted
+            this.selectedProduct = this.products[0];
+            this.selectedModel = this.products[0].models[0];
         },
         methods: {
             async askForSerialPort() {
@@ -1060,7 +749,7 @@
                 // close port
                 console.log("Closing serial port");
                 try {
-                    await this.serialPort.close();
+                    await serialPort.close();
                 } catch(e) {
                     console.log("failed to close serial port, ignoring...", e);
                 }
@@ -1219,6 +908,7 @@
                     rx_stat: await rnode.getRxStat(),
                     tx_stat: await rnode.getTxStat(),
                     rssi_stat: await rnode.getRssiStat(),
+                    wifi_mode: await rnode.getWifiMode(),
                 });
 
                 await rnode.close();
@@ -1788,6 +1478,331 @@
                 ].join("\n"));
 
             },
+
+            async setWiFiMode() {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if (!rnode) {
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if (!details || !details.is_provisioned) {
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // normalize mode to number (safety)
+                const mode = Number(this.wifiMode);
+
+                console.log("setting wifi mode to", mode);
+
+                await rnode.enableWiFiMode(mode);
+
+                console.log("setting wifi mode: done");
+
+                const modeMap = {
+                    0: "OFF",
+                    1: "STATION",
+                    2: "AP"
+                };
+
+                const modeLabel = modeMap[mode] ?? "UNKNOWN";
+
+                alert("WiFi mode has been set to " + modeLabel + "!");
+
+                // update UI if needed
+                this.wifiMode = mode;
+
+                // done
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+            },
+            
+            async setWiFiChannel() {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // set wifi channel
+                console.log("setting wifi channel to", this.wifiChannel);
+                await rnode.setWiFiChannel(this.wifiChannel);
+                console.log("setting wifi channel: done");
+                alert("WiFi channel has been set to " + this.wifiChannel + "!");
+
+                // done
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+            },
+            async setWiFiSSID() {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // set wifi SSID
+                console.log("setting wifi SSID to", this.wifiSSID);
+                await rnode.setWiFiSSID(this.wifiSSID);
+                console.log("setting wifi SSID: done");
+                alert("WiFi SSID has been set to " + this.wifiSSID + "!");
+
+                // done
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+
+            },
+            async disableWiFiMode() {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // disable wifi mode
+                console.log("disabling wifi mode");
+                await rnode.disableWiFiMode();
+                console.log("disabling wifi mode: done");
+                alert("WiFi mode has been disabled!");
+
+                // done
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+
+            },
+            async setWiFiPSK() {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // set wifi psk
+                console.log("setting wifi psk to", this.wifiPSK);
+                await rnode.setWiFiPSK(this.wifiPSK);
+                console.log("setting wifi psk: done");
+                alert("WiFi PSK has been set!");
+
+                // done
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+
+            },
+            async unsetWiFiSSID() {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // unset wifi SSID by setting it to "None"
+                console.log("unsetting wifi SSID");
+                await rnode.setWiFiSSID("None");
+                console.log("unsetting wifi SSID: done");
+                alert("WiFi SSID has been unset!");
+
+                // update UI
+                this.wifiSSID = "None";
+
+                // done
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+
+            },
+            async unsetWiFiPSK() {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // unset wifi psk by setting it to "None"
+                console.log("unsetting wifi psk");
+                await rnode.setWiFiPSK(null);
+                console.log("unsetting wifi psk: done");
+                alert("WiFi PSK has been unset!");
+
+                // update UI
+                this.wifiPSK = "";
+
+                // done
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+
+            },
+
+            async unsetWiFiIP() {
+
+                const rnode = await this.askForRNode();
+                if (!rnode) return;
+
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if (!details || !details.is_provisioned) {
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                console.log("unsetting wifi ip");
+
+                await rnode.setWiFiIP(null);
+
+                console.log("unsetting wifi ip: done");
+
+                this.wifiIP = "";
+
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+            },
+
+            async unsetWiFiNM() {
+
+                const rnode = await this.askForRNode();
+                if (!rnode) return;
+
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if (!details || !details.is_provisioned) {
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                console.log("unsetting wifi netmask");
+
+                await rnode.setWiFiNM(null);
+
+                console.log("unsetting wifi netmask: done");
+
+                this.wifiNM = "";
+
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+            },            
+
+            async setWiFiIP() {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // set wifi ip
+                console.log("setting wifi ip to", this.wifiIP);
+                await rnode.setWiFiIP(this.wifiIP);
+                console.log("setting wifi ip: done");
+                alert("WiFi IP has been set to " + this.wifiIP + "!");
+
+                // done
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+
+            },
+            async setWiFiNM() {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // set wifi nm
+                console.log("setting wifi nm to", this.wifiNM);
+                await rnode.setWiFiNM(this.wifiNM);
+                console.log("setting wifi nm: done");
+                alert("WiFi Netmask has been set to " + this.wifiNM + "!");
+
+                // done
+                await Utils.sleepMillis(1000);
+                await rnode.close();
+
+            },
             async setDisplayRotation(rotation) {
 
                 // ask for rnode
@@ -1809,6 +1824,58 @@
                 console.log("setting display rotation");
                 await rnode.setDisplayRotation(rotation);
                 console.log("setting display rotation: done");
+
+                // done
+                await rnode.close();
+
+            },
+            async setDisplayIntensity(intensity) {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // configure
+                console.log("setting display intensity");
+                await rnode.setDisplayIntensity(intensity);
+                console.log("setting display intensity: done");
+
+                // done
+                await rnode.close();
+
+            },
+            async setDisplayTimeout(timeout) {
+
+                // ask for rnode
+                const rnode = await this.askForRNode();
+                if(!rnode){
+                    return;
+                }
+
+                // check if device has been provisioned
+                const rom = await rnode.getRomAsObject();
+                const details = rom.parse();
+                if(!details || !details.is_provisioned){
+                    alert("Eeprom is not provisioned. You must do this first!");
+                    await rnode.close();
+                    return;
+                }
+
+                // configure
+                console.log("setting display timeout");
+                await rnode.setDisplayTimeout(timeout);
+                console.log("setting display timeout: done");
 
                 // done
                 await rnode.close();
@@ -1854,11 +1921,63 @@
             recommendedFirmwareFilename() {
                 return this.selectedModel?.firmware_filename ?? this.selectedProduct?.firmware_filename;
             },
+            FirmwareRepo() {
+                return this.selectedModel?.firmware_repo ?? this.selectedProduct?.firmware_repo;
+            },
+            isSsidValid() {
+                if (!this.wifiSSID) return false;
+
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(this.wifiSSID);
+
+                return bytes.length >= 1 && bytes.length <= 32;
+            },
+            isPskValid() {
+                if (!this.wifiPSK) return false;
+
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(this.wifiPSK);
+
+                return bytes.length >= 8;
+            },
+            isIpValid() {
+                if (!this.wifiIP) return false;
+
+                const parts = this.wifiIP.split(".");
+                if (parts.length !== 4) return false;
+
+                for (const part of parts) {
+                    if (part === "") return false;
+
+                    const num = Number(part);
+                    if (!Number.isInteger(num)) return false;
+                    if (num < 0 || num > 255) return false;
+                }
+                return true;
+            },
+            isNetmaskValid() {
+                if (!this.wifiNM) return false;
+
+                const parts = this.wifiNM.split(".");
+                if (parts.length !== 4) return false;
+
+                for (const part of parts) {
+                    if (part === "") return false;
+
+                    const num = Number(part);
+                    if (!Number.isInteger(num)) return false;
+                    if (num < 0 || num > 255) return false;
+                }
+
+                return true;
+            },
         },
         watch: {
             selectedProduct() {
-                // reset selected model when changing selected product
-                this.selectedModel = null;
+                // reset selected model when changing selected product, but not during initialization
+                if (!this.isInitializing) {
+                    this.selectedModel = null;
+                }
             },
         },
     }).mount('#app');

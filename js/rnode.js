@@ -80,7 +80,15 @@ class RNode {
     CMD_HASHES = 0x60;
     CMD_FW_UPD = 0x61;
     CMD_DISP_ROT = 0x67;
+    CMD_DISP_INT = 0x45;
+    CMD_DISP_BLNK = 0x64;
     CMD_DISP_RCND = 0x68;
+    CMD_WIFI_MODE = 0x6A;
+    CMD_WIFI_SSID = 0x6B;
+    CMD_WIFI_PSK = 0x6C;
+    CMD_WIFI_CHN = 0x6E;
+    CMD_WIFI_IP = 0x84;
+    CMD_WIFI_NM = 0x85;
 
     CMD_BT_CTRL = 0x46;
     CMD_BT_PIN = 0x62;
@@ -610,6 +618,185 @@ class RNode {
 
     }
 
+    async enableWiFiMode(wifiMode) {
+        await this.sendKissCommand([
+            this.CMD_WIFI_MODE,
+            wifiMode, // 0x00 = OFF, 0x01 = AP, 0x02 = STATION
+        ]);
+    }
+
+    async disableWiFiMode() {
+        await this.sendKissCommand([
+            this.CMD_WIFI_MODE,
+            0x00, // OFF
+        ]);
+    }
+
+    async setWiFiChannel(wifiChannel) {
+        await this.sendKissCommand([
+            this.CMD_WIFI_CHN,
+            wifiChannel, // 1-14
+        ]);
+    }
+
+    async setWiFiSSID(wifiSSID) {
+        const encoder = new TextEncoder();
+        const ssidBytes = encoder.encode(wifiSSID);
+
+        // Add null terminator
+        const data = new Uint8Array(ssidBytes.length + 1);
+        data.set(ssidBytes);
+        data[data.length - 1] = 0x00;
+
+        // KISS escape
+        const escaped = [];
+        for (const byte of data) {
+            if (byte === this.FEND) {
+                escaped.push(this.FESC, this.TFEND);
+            } else if (byte === this.FESC) {
+                escaped.push(this.FESC, this.TFESC);
+            } else {
+                escaped.push(byte);
+            }
+        }
+
+        // Send command
+        await this.sendKissCommand([
+            this.CMD_WIFI_SSID,
+            ...escaped,
+        ]);
+    }
+
+    async setWiFiPSK(wifiPSK) {
+        if (wifiPSK == null) {
+            // Clear PSK
+            await this.sendKissCommand([
+                this.CMD_WIFI_PSK,
+                0x00
+            ]);
+            return;
+        }
+
+        const encoder = new TextEncoder();
+        const pskBytes = encoder.encode(wifiPSK);
+
+        // Enforce firmware length rules (8–32 characters)
+        if (pskBytes.length < 8 || pskBytes.length > 32) {
+            throw new Error("Invalid PSK length (must be 8–32 bytes)");
+        }
+
+        // Add null terminator
+        const data = new Uint8Array(pskBytes.length + 1);
+        data.set(pskBytes);
+        data[data.length - 1] = 0x00;
+
+        // KISS escape
+        const escaped = [];
+        for (const byte of data) {
+            if (byte === this.FEND) {
+                escaped.push(this.FESC, this.TFEND);
+            } else if (byte === this.FESC) {
+                escaped.push(this.FESC, this.TFESC);
+            } else {
+                escaped.push(byte);
+            }
+        }
+
+        // Send command
+        await this.sendKissCommand([
+            this.CMD_WIFI_PSK,
+            ...escaped,
+        ]);
+    }
+
+    async setWiFiIP(wifiIP) {
+    if (wifiIP == null) {
+        // Clear IP → 0.0.0.0
+        await this.sendKissCommand([
+            this.CMD_WIFI_IP,
+            0x00, 0x00, 0x00, 0x00
+        ]);
+        return;
+    }
+
+    if (typeof wifiIP !== "string") {
+        throw new TypeError("Invalid IP address (not a string)");
+    }
+
+    const octets = wifiIP.split(".");
+    if (octets.length !== 4) {
+        throw new Error("Invalid IP address length");
+    }
+
+    const ipBytes = new Uint8Array(4);
+
+    for (let i = 0; i < 4; i++) {
+        const octet = Number(octets[i]);
+
+        if (!Number.isInteger(octet) || octet < 0 || octet > 255) {
+            throw new Error("Invalid IP octet value");
+        }
+
+        ipBytes[i] = octet;
+    }
+
+    // KISS escape (same as PSK logic)
+    const escaped = [];
+    for (const byte of ipBytes) {
+        if (byte === this.KISS_FEND) {
+            escaped.push(this.KISS_FESC, this.KISS_TFEND);
+        } else if (byte === this.KISS_FESC) {
+            escaped.push(this.KISS_FESC, this.KISS_TFESC);
+        } else {
+            escaped.push(byte);
+        }
+    }
+
+    // Send command exactly like PSK does
+    await this.sendKissCommand([
+        this.CMD_WIFI_IP,
+        ...escaped,
+        ]);
+    }
+
+    async setWiFiNM(wifiNM) {
+    if (wifiNM == null) {
+        // Clear netmask → 0.0.0.0
+        await this.sendKissCommand([
+            this.CMD_WIFI_NM,
+            0x00, 0x00, 0x00, 0x00
+        ]);
+        return;
+    }
+
+    if (typeof wifiNM !== "string") {
+        throw new TypeError("Invalid netmask (not a string)");
+    }
+
+    const octets = wifiNM.split(".");
+    if (octets.length !== 4) {
+        throw new Error("Invalid netmask length");
+    }
+
+    const nmBytes = new Uint8Array(4);
+
+    for (let i = 0; i < 4; i++) {
+        const octet = Number(octets[i]);
+
+        if (!Number.isInteger(octet) || octet < 0 || octet > 255) {
+            throw new Error("Invalid netmask octet value");
+        }
+
+        nmBytes[i] = octet;
+    }
+
+    // Send using same KISS pipeline as PSK/IP
+    await this.sendKissCommand([
+        this.CMD_WIFI_NM,
+        ...nmBytes
+        ]);
+    }
+
     async readDisplay() {
 
         const response = await this.sendCommand(this.CMD_DISP_READ, [
@@ -759,6 +946,20 @@ class RNode {
         ]);
     }
 
+    async setDisplayIntensity(intensity) {
+        await this.sendKissCommand([
+            this.CMD_DISP_INT,
+            intensity & 0xFF,
+        ]);
+    }
+
+    async setDisplayTimeout(timeout) {
+        await this.sendKissCommand([
+            this.CMD_DISP_BLNK,
+            timeout & 0xFF,
+        ]);
+    }
+
     async startDisplayReconditioning() {
         await this.sendKissCommand([
             this.CMD_DISP_RCND,
@@ -855,12 +1056,29 @@ class ROM {
     static ADDR_CHKSUM    = 0x0B
     static ADDR_SIGNATURE = 0x1B
     static ADDR_INFO_LOCK = 0x9B
+
     static ADDR_CONF_SF   = 0x9C
     static ADDR_CONF_CR   = 0x9D
     static ADDR_CONF_TXP  = 0x9E
     static ADDR_CONF_BW   = 0x9F
     static ADDR_CONF_FREQ = 0xA3
     static ADDR_CONF_OK   = 0xA7
+    static ADDR_CONF_BT   = 0xB0
+    static ADDR_CONF_DSET = 0xB1
+    static ADDR_CONF_DINT = 0xB2
+    static ADDR_CONF_DADR = 0xB3
+    static ADDR_CONF_DBLK = 0xB4
+    static ADDR_CONF_DROT = 0xB8
+    static ADDR_CONF_PSET = 0xB5
+    static ADDR_CONF_PINT = 0xB6
+    static ADDR_CONF_BSET = 0xB7
+    static ADDR_CONF_DIA  = 0xB9
+    static ADDR_CONF_WIFI = 0xBA
+    static ADDR_CONF_WCHN = 0xBB
+    static ADDR_CONF_SSID = 0x00
+    static ADDR_CONF_PSK  = 0x21
+    static ADDR_CONF_IP   = 0x42
+    static ADDR_CONF_NM   = 0x46
 
     static INFO_LOCK_BYTE = 0x73
     static CONF_OK_BYTE   = 0x73
